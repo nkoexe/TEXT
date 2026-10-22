@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">TEXT</string>
     <string name="show_text">SHOW</string>
+    <string name="recent_history">RECENT</string>
+    <string name="text_does_not_fit">Text won't fit at the minimum size (18 sp).</string>
 </resources>

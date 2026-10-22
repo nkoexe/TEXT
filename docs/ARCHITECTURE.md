@@ -5,18 +5,20 @@
 - One Activity with a small number of Compose screens.
 - Keep UI state coordination separate from persistence.
 - Keep all data local. No network stack or Internet permission.
-- Use a deterministic, pure history policy for rules that can be unit tested on the JVM.
+- Use deterministic pure policies for behavior that can be tested on the JVM.
 - Avoid a formal domain/use-case layer without a concrete need.
 
 ## Responsibilities
 
-- `MainActivity.kt`: entry point, editor/display state, orientation and system-bar transitions.
-- `ui/HomeScreen.kt`: focused multiline editor, landscape-shaped preview, SHOW action, and history UI.
-- `ui/DisplayScreen.kt`: immersive landscape rendering and text fitting.
-- `ui/theme/Theme.kt`: monochrome Material 3 dark color scheme.
-- `data/HistoryPolicy.kt`: pure rules for exact matching, duplicate promotion, filtering, ordering, and the ten-entry limit.
-- `data/HistoryRepository.kt`: app-private SQLite database and transactional persistence.
-- `HomeViewModel.kt`: serializes history operations, performs database work off the main thread, and exposes observable history state.
+- MainActivity.kt: entry point, editor/display state, orientation and system-bar transitions.
+- ui/HomeScreen.kt: focused multiline editor, landscape-shaped preview, SHOW action, and history UI.
+- ui/DisplayScreen.kt: immersive landscape rendering.
+- ui/TextFitting.kt: shared measured font-fit implementation used by editor and display.
+- ui/FontFitPolicy.kt: pure binary-search policy, including minimum-size overflow status.
+- ui/theme/Theme.kt: monochrome Material 3 dark color scheme.
+- data/HistoryPolicy.kt: pure rules for exact matching, duplicate promotion, ordering, and the ten-entry limit.
+- data/HistoryRepository.kt: app-private SQLite database and transactional persistence.
+- HomeViewModel.kt: serializes history operations, performs database work off the main thread, and exposes observable history state.
 
 ## History storage contract
 
@@ -32,7 +34,7 @@ The small fixed history limit makes replacing ten rows transactionally a straigh
 
 ## Preview/display sizing
 
-A matching aspect ratio alone is insufficient to guarantee identical line breaks. The current code shares the text-fitting function but still uses iterative shrinking based on layout overflow; it is not yet verified for minimum-size handling, long text, or parity across device sizes. Avoid claiming perfect preview parity before device testing.
+Both screens use TextMeasurer against actual width and height constraints, then binary-search for the largest font that fits down to 18sp. When even 18sp overflows, the editor shows a warning and the display keeps the minimum rather than silently shrinking the type to an unreadable size. Line wrapping and preview/display parity still require device verification across font scales and aspect ratios.
 
 ## Android window lifecycle
 

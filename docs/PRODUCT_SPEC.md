@@ -25,11 +25,11 @@ TEXT is a minimal Android utility for composing a short message and presenting i
 
 ## Preview and display parity
 
-- Share text-fitting/layout logic rather than maintaining unrelated renderers.
-- The preview is a scaled-down representation of the landscape display layout.
-- Center text horizontally and vertically.
-- The current font-fitting baseline shrinks on reported overflow; its behavior at minimum size and parity across device sizes still needs verification.
-- Never silently truncate or discard text. If content remains too long at minimum size, provide a clear indication in the editing UI.
+- Share a measured font-fitting implementation rather than maintaining unrelated renderers.
+- Measure text within actual width and height constraints and use binary search to choose the largest fitting font.
+- Minimum font size is 18sp. If content still overflows, show a warning in the editor and retain the minimum size rather than making text unreadably small.
+- The preview is a scaled-down representation of the landscape display layout; line breaks and proportions still need device verification.
+- Never modify, normalize, or discard the source text.
 
 ## Display screen
 
@@ -56,4 +56,4 @@ No settings, customization, themes, font controls, sharing, synchronization, acc
 
 ## Acceptance criteria
 
-See the checklists in [ROADMAP.md](ROADMAP.md). Do not mark a feature complete until it is implemented and verified on an emulator/device as appropriate.
+See the checklists in ROADMAP.md. Do not mark a feature complete until it is implemented and verified on an emulator/device as appropriate.

@@ -19,7 +19,8 @@ Implementation checklist. Only mark behavior complete after it is tested on a de
 ## Editor and display
 - [x] Multiline editor, live landscape-shaped preview, initial focus, SHOW validation.
 - [x] Immersive landscape display and keep-screen-on while displayed.
-- [ ] Replace iterative font shrinking with measured bounded fitting; show an overflow warning at minimum size.
+- [x] Measure available width/height and binary-search font sizes with an 18sp minimum.
+- [x] Warn in the editor when content still overflows at 18sp.
 - [ ] Verify line wrapping, font scale/density behavior, and preview/display parity on multiple device sizes.
 - [ ] Verify Back and lifecycle exit paths restore orientation/system bars and reopen the keyboard.
 - [ ] Verify SHOW remains reachable on small screens and with large keyboards/font scales.
