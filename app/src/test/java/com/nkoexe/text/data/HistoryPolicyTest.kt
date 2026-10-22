@@ -72,13 +72,14 @@ class HistoryPolicyTest {
 
     @Test
     fun duplicatePromotionAtTheLimitDoesNotEvictAnotherEntry() {
+        // The supplied list is already newest-first, so text-10 is the oldest entry.
         val current = (1L..HistoryPolicy.MAX_ENTRIES).map { entry("text-$it", it) }
 
         val result = HistoryPolicy.record(current, "text-10", 99L)
 
         assertEquals(HistoryPolicy.MAX_ENTRIES, result.size)
         assertEquals("text-10", result.first().text)
-        assertEquals("text-9", result[1].text)
+        assertEquals("text-1", result[1].text)
         assertEquals(1, result.count { it.text == "text-10" })
     }
 
@@ -93,8 +94,11 @@ class HistoryPolicyTest {
         val result = HistoryPolicy.record(current, "\n", 99L)
 
         assertEquals(HistoryPolicy.MAX_ENTRIES, result.size)
-        assertEquals(listOf("duplicate", "text-1", "text-2", "text-3", "text-4",
-            "text-5", "text-6", "text-7", "text-8", "text-9"), result.texts())
+        assertEquals(
+            listOf("duplicate", "text-1", "text-2", "text-3", "text-4",
+                "text-5", "text-6", "text-7", "text-8", "text-9"),
+            result.texts()
+        )
         assertTrue(result.none { it.text.isBlank() })
         assertEquals(5L, result.first().lastShownAtEpochMillis)
     }
