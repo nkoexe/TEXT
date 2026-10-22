@@ -4,9 +4,10 @@ Implementation checklist. Only mark behavior complete after it is tested on a de
 
 ## Repository and CI
 - [x] Compose project scaffold and agent/product documentation.
-- [x] GitHub Actions for unit tests, lint, debug APK artifact, and emulator instrumentation tests.
+- [x] Default CI builds and uploads the debug APK, runs JVM unit tests and Android lint, and compiles instrumentation tests.
+- [x] Provide a separately triggered API 35 emulator workflow for connected tests.
 - [ ] Add official Gradle Wrapper and verify wrapper-based CI.
-- [ ] Confirm all CI stages are green on the current PR.
+- [ ] Confirm all default CI stages are green on the current PR and run the manual instrumented workflow.
 
 ## History
 - [x] Persist history locally in a private on-device SQLite database.
@@ -14,7 +15,7 @@ Implementation checklist. Only mark behavior complete after it is tested on a de
 - [x] Unit tests for blank input, exact matching, promotion, timestamp replacement, duplicates, and cap/eviction.
 - [x] Instrumentation tests for persistence across database reopen, exact-match deletion, blank input, cap, and clock-independent ordering.
 - [x] Tap to load, swipe horizontally to delete, and hide history while the IME is visible.
-- [ ] Test history behavior manually on Android 8 and a current Android release.
+- [ ] Verify history behavior on Android 8 and a current Android release.
 
 ## Editor and display
 - [x] Multiline editor, live landscape-shaped preview, initial focus, SHOW validation.
@@ -26,6 +27,6 @@ Implementation checklist. Only mark behavior complete after it is tested on a de
 - [ ] Verify SHOW remains reachable on small screens and with large keyboards/font scales.
 
 ## Release readiness
-- [ ] Expand UI tests beyond the home smoke test to edit/show/back/history flows.
+- [ ] Expand UI tests beyond the home smoke and validation tests to edit/show/back/history flows.
 - [ ] Add a release APK workflow and secure signing setup when signing details are decided.
 - [ ] Review dependency footprint, manifest, and privacy behavior.

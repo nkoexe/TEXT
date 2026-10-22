@@ -47,14 +47,9 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Unit tests
+      - name: JVM unit tests
         run: gradle testDebugUnitTest
       - name: Android lint
         run: gradle lintDebug
-      - name: Instrumented tests (API 35 emulator)
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 35
-          target: google_apis
-          arch: x86_64
-          script: gradle connectedDebugAndroidTest
+      - name: Compile instrumentation tests
+        run: gradle compileDebugAndroidTestKotlin
