@@ -1,10 +1,7 @@
 package com.nkoexe.text.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -271,11 +268,7 @@ private fun HistoryEntry(
                     .padding(horizontal = 24.dp),
                 contentAlignment = alignment
             ) {
-                AnimatedVisibility(
-                    visible = isSwipingToDelete,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
+                if (isSwipingToDelete) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
