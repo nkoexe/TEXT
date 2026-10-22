@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,14 @@ class MainActivity : ComponentActivity() {
                         insetsController.hide(WindowInsetsCompat.Type.systemBars())
                         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     } else {
+                        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        insetsController.show(WindowInsetsCompat.Type.systemBars())
+                        window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                }
+
+                DisposableEffect(window) {
+                    onDispose {
                         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                         insetsController.show(WindowInsetsCompat.Type.systemBars())
                         window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
