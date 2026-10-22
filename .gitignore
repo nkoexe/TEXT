@@ -1,0 +1,19 @@
+# Android / Gradle generated files
+.gradle/
+**/build/
+local.properties
+*.iml
+
+# IDE state
+.idea/
+.DS_Store
+
+# Native/NDK generated output
+.externalNativeBuild/
+.cxx/
+captures/
+
+# Signing material and local secrets
+*.jks
+*.keystore
+secrets.properties

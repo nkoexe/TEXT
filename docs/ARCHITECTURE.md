@@ -5,8 +5,8 @@
 - One Activity with a small number of Compose screens.
 - Keep UI state coordination separate from persistence.
 - Keep all data local. No network stack or Internet permission.
-- Favor deterministic pure helpers for business rules.
-- Avoid a formal domain/use-case layer until a concrete need appears.
+- Use a deterministic, pure history policy for rules that can be unit tested on the JVM.
+- Avoid a formal domain/use-case layer without a concrete need.
 
 ## Responsibilities
 
@@ -14,29 +14,30 @@
 - `ui/HomeScreen.kt`: focused multiline editor, landscape-shaped preview, SHOW action, and history UI.
 - `ui/DisplayScreen.kt`: immersive landscape rendering and text fitting.
 - `ui/theme/Theme.kt`: monochrome Material 3 dark color scheme.
-- `data/HistoryPolicy.kt`: pure history rules, independent of persistence.
-- `data/HistoryRepository.kt`: private SQLite database and transactional history updates.
-- `HomeViewModel.kt`: asynchronous repository access and observable history state.
+- `data/HistoryPolicy.kt`: pure rules for exact matching, duplicate promotion, filtering, ordering, and the ten-entry limit.
+- `data/HistoryRepository.kt`: app-private SQLite database and transactional persistence.
+- `HomeViewModel.kt`: serializes history operations, performs database work off the main thread, and exposes observable history state.
 
 ## History storage contract
 
-Record a display operation transactionally:
+- Reject blank/whitespace-only text.
+- Keep exact text (no trimming, normalization, or case folding).
+- Promote exact duplicates and refresh their timestamp.
+- Keep newest-first ordering and at most 10 unique non-blank entries.
+- Apply the pure policy to the existing list and replace at most 10 rows in one transaction.
+- Use row insertion order for ordering instead of wall-clock time, so system clock changes do not reorder history.
+- Support exact text deletion and survive app restarts.
 
-1. Reject blank/whitespace-only text.
-2. Delete an exact text match before reinserting it as the newest item.
-3. Sort newest first and delete entries beyond 10.
-4. Emit the updated list to the UI.
-
-Text is never trimmed or normalized. The database's unique text constraint and transaction prevent duplicate rows. The database is app-private and contains no user data beyond the text and timestamp.
+The small fixed history limit makes replacing ten rows transactionally a straightforward choice. A failed transaction rolls back as a unit.
 
 ## Preview/display sizing
 
-A matching aspect ratio alone is insufficient to guarantee identical line breaks. The current code shares the text-fitting function but still needs device verification. Test identical text across densities, font scales, and aspect ratios. Document any unavoidable platform differences rather than claiming perfect parity without proof.
+A matching aspect ratio alone is insufficient to guarantee identical line breaks. The current code shares the text-fitting function but still uses iterative shrinking based on layout overflow; it is not yet verified for minimum-size handling, long text, or parity across device sizes. Avoid claiming perfect preview parity before device testing.
 
 ## Android window lifecycle
 
 - Home remains portrait.
 - Display requests landscape and immersive system-bar behavior.
 - Keep-screen-on is enabled only during display.
-- Back returns to the editor and restores system bars and normal timeout behavior.
+- Back returns to the editor and restores orientation/system bars.
 - Preserve editor content through configuration changes and process recreation where feasible.

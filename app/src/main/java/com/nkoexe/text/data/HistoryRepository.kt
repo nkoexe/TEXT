@@ -5,65 +5,89 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-data class HistoryRecord(
-    val text: String,
-    val lastShownAtEpochMillis: Long
-)
-
-object HistoryPolicy {
-    const val MAX_ENTRIES = 10
-
-    fun record(current: List<HistoryRecord>, text: String, timestamp: Long): List<HistoryRecord> {
-        if (text.isBlank()) return current.take(MAX_ENTRIES)
-        return buildList {
-            add(HistoryRecord(text, timestamp))
-            current.asSequence().filterNot { it.text == text }
-                .take(MAX_ENTRIES - 1).forEach(::add)
-        }
-    }
-}
-
-/** Small, private on-device database. No external storage or network access. */
-class HistoryRepository(context: Context) {
+/**
+ * App-private persistence for the last ten displayed messages.
+ *
+ * Every write is transactional. The pure [HistoryPolicy] is the single source of
+ * truth for duplicate handling, ordering, and the history limit.
+ */
+class HistoryRepository(context: Context) : AutoCloseable {
     private val helper = HistoryDb(context.applicationContext)
 
-    fun all(): List<HistoryRecord> = helper.readableDatabase.query(
-        "history", arrayOf("text", "shown_at"), null, null, null, null, "shown_at DESC, rowid DESC"
-    ).use { cursor ->
-        buildList {
-            while (cursor.moveToNext()) add(HistoryRecord(cursor.getString(0), cursor.getLong(1)))
-        }
-    }
+    @Synchronized
+    fun all(): List<HistoryRecord> = readAll(helper.readableDatabase)
 
+    @Synchronized
     fun record(text: String, timestamp: Long = System.currentTimeMillis()) {
         if (text.isBlank()) return
+
         val db = helper.writableDatabase
         db.beginTransaction()
         try {
-            db.delete("history", "text = ?", arrayOf(text))
-            db.insertOrThrow("history", null, ContentValues().apply {
-                put("text", text)
-                put("shown_at", timestamp)
-            })
-            db.execSQL(
-                "DELETE FROM history WHERE rowid NOT IN (SELECT rowid FROM history ORDER BY shown_at DESC, rowid DESC LIMIT ?)",
-                arrayOf(HistoryPolicy.MAX_ENTRIES)
-            )
+            val updated = HistoryPolicy.record(readAll(db), text, timestamp)
+
+            // History contains at most ten rows, so replacing it in one transaction
+            // keeps the persistence layer simple and makes policy behavior explicit.
+            db.delete(TABLE_HISTORY, null, null)
+            // Insert backwards because rowid DESC is the stable, clock-independent order.
+            updated.asReversed().forEach { item ->
+                db.insertOrThrow(TABLE_HISTORY, null, ContentValues().apply {
+                    put(COLUMN_TEXT, item.text)
+                    put(COLUMN_SHOWN_AT, item.lastShownAtEpochMillis)
+                })
+            }
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
         }
     }
 
+    @Synchronized
     fun delete(text: String) {
-        helper.writableDatabase.delete("history", "text = ?", arrayOf(text))
+        helper.writableDatabase.delete(TABLE_HISTORY, "$COLUMN_TEXT = ?", arrayOf(text))
     }
 
-    private class HistoryDb(context: Context) : SQLiteOpenHelper(context, "text-history.db", null, 1) {
-        override fun onCreate(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE history (text TEXT NOT NULL UNIQUE, shown_at INTEGER NOT NULL)")
-            db.execSQL("CREATE INDEX history_shown_at ON history(shown_at DESC)")
+    @Synchronized
+    override fun close() = helper.close()
+
+    private fun readAll(db: SQLiteDatabase): List<HistoryRecord> =
+        db.query(
+            TABLE_HISTORY,
+            arrayOf(COLUMN_TEXT, COLUMN_SHOWN_AT),
+            null,
+            null,
+            null,
+            null,
+            "rowid DESC"
+        ).use { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(HistoryRecord(cursor.getString(0), cursor.getLong(1)))
+                }
+            }
         }
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+
+    private class HistoryDb(context: Context) :
+        SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
+        override fun onCreate(db: SQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE $TABLE_HISTORY (" +
+                    "$COLUMN_TEXT TEXT NOT NULL UNIQUE, " +
+                    "$COLUMN_SHOWN_AT INTEGER NOT NULL)"
+            )
+        }
+
+        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            // No schema changes have shipped yet. Add explicit migrations when needed.
+        }
+    }
+
+    private companion object {
+        const val DATABASE_NAME = "text-history.db"
+        const val DATABASE_VERSION = 1
+        const val TABLE_HISTORY = "history"
+        const val COLUMN_TEXT = "text"
+        const val COLUMN_SHOWN_AT = "shown_at"
     }
 }

@@ -35,10 +35,8 @@ jobs:
           packages: platform-tools
       - name: Install required SDK packages
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
-      - name: Unit tests
-        run: gradle testDebugUnitTest
-      - name: Android lint
-        run: gradle lintDebug
+
+      # Package first so a later test assertion failure does not discard a valid APK.
       - name: Build debug APK
         run: gradle assembleDebug
       - name: Upload debug APK
@@ -48,3 +46,15 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Unit tests
+        run: gradle testDebugUnitTest
+      - name: Android lint
+        run: gradle lintDebug
+      - name: Instrumented tests (API 35 emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          script: gradle connectedDebugAndroidTest
