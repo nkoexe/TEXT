@@ -1,3 +1,6 @@
+import java.net.URI
+import java.security.MessageDigest
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -13,7 +16,7 @@ val prepareOutfitFont = tasks.register("prepareOutfitFont") {
         if (!destination.exists()) {
             destination.parentFile.mkdirs()
             val temporary = destination.resolveSibling("${destination.name}.download")
-            val fontUrl = java.net.URI(
+            val fontUrl = URI(
                 "https://raw.githubusercontent.com/google/fonts/45e3d5269e4a17d823f6d84470bc084dc5ae46f6/ofl/outfit/Outfit%5Bwght%5D.ttf"
             ).toURL()
             val connection = fontUrl.openConnection().apply {
@@ -25,7 +28,7 @@ val prepareOutfitFont = tasks.register("prepareOutfitFont") {
             }
 
             val bytes = temporary.readBytes()
-            val digest = java.security.MessageDigest.getInstance("SHA-1")
+            val digest = MessageDigest.getInstance("SHA-1")
             digest.update("blob ${bytes.size}\u0000".toByteArray(Charsets.UTF_8))
             val actualBlobSha = digest.digest(bytes).joinToString("") {
                 "%02x".format(it.toInt() and 0xff)
