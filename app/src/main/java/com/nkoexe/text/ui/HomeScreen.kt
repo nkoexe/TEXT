@@ -97,7 +97,7 @@ fun HomeScreen(
 
         if (textOverflowsAtMinimum) {
             Text(
-                text = stringResource(R.string.text_does_not_fit),
+                text = stringResource(R.string.text_overflow_warning),
                 color = Color(0xFFFFC857),
                 style = MaterialTheme.typography.labelSmall
             )
@@ -105,7 +105,7 @@ fun HomeScreen(
 
         if (!imeVisible && history.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.recent_history),
+                text = stringResource(R.string.text_history_section),
                 color = Color.LightGray,
                 style = MaterialTheme.typography.labelMedium
             )
@@ -156,7 +156,7 @@ fun HomeScreen(
             )
         ) {
             Text(
-                text = stringResource(R.string.show_text),
+                text = stringResource(R.string.text_show_action),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
