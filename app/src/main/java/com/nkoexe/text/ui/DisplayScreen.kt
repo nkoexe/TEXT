@@ -16,12 +16,10 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun DisplayScreen(text: String) {
     BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
+        modifier = Modifier.fillMaxSize().background(Color.Black),
         contentAlignment = Alignment.Center
     ) {
-        val fitting = rememberFittedFontSize(text, maxHeight)
+        val fitting = rememberFittedFontSize(text, maxWidth, maxHeight)
 
         Text(
             text = text,
@@ -31,8 +29,7 @@ fun DisplayScreen(text: String) {
             style = TextStyle(
                 fontSize = fitting.size,
                 lineHeight = (fitting.size.value * 1.08f).sp
-            ),
-            onTextLayout = fitting.onTextLayout
+            )
         )
     }
 }
