@@ -1,22 +1,18 @@
 # TEXT
 
-A minimal Android app for typing a message, previewing it in a landscape-shaped surface, and showing it fullscreen in landscape.
+A minimal offline Android app for typing text, previewing it in a landscape-shaped surface, and showing it fullscreen in landscape.
 
-> **Bootstrap status:** the first Compose skeleton is in place. Persistent history, verified preview/display parity, and release packaging are not implemented yet. Track progress in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+## Features
 
-## Product constraints
-
-- Kotlin + Jetpack Compose + Material 3
-- Android 8.0 (API 26) and newer
-- Portrait editor with a landscape-shaped live preview
-- One-tap immersive landscape text display
-- Local history, limited to the 10 most recently displayed texts (planned; policy tests exist)
-- No accounts, backend, Internet access, analytics, customization, or Play Store distribution
-- GitHub Actions for tests, lint, and debug APK artifacts
+- Native Kotlin + Jetpack Compose + Material 3; Android 8.0 (API 26)+.
+- Multiline editor with a live landscape-proportioned preview.
+- One-tap immersive landscape display; Back returns to portrait editing.
+- Local on-device history: newest first, exact duplicates move to the top, capped at 10 entries. Tap to reuse; swipe horizontally to delete.
+- No accounts, network access, analytics, or external storage.
 
 ## Build
 
-Requirements: JDK 17, Android SDK Platform 36, and Gradle 8.13.
+Requirements: JDK 17, Android SDK Platform 36, Build Tools 36.0.0, and Gradle 8.13.
 
 ```bash
 gradle testDebugUnitTest
@@ -24,13 +20,13 @@ gradle lintDebug
 gradle assembleDebug
 ```
 
-The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
+The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`. GitHub Actions runs tests, lint, and a debug build for pushes and pull requests to `main`, then uploads the APK as an artifact.
 
-The initial workflow installs Gradle directly. Adding the official Gradle Wrapper is tracked in the roadmap so contributors can use `./gradlew` consistently.
+The repository currently uses installed Gradle in local/CI instructions rather than the Gradle Wrapper. A wrapper should be generated and checked in from a trusted Gradle installation before expecting `./gradlew` to work.
 
 ## Documentation
 
-- [`AGENTS.md`](AGENTS.md) — coding-agent instructions
+- [Agent instructions](AGENTS.md)
 - [Product specification](docs/PRODUCT_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Development guide](docs/DEVELOPMENT.md)
@@ -38,4 +34,4 @@ The initial workflow installs Gradle directly. Adding the official Gradle Wrappe
 
 ## License
 
-No license has been selected. Do not assume the project is open-source licensed until a license is added.
+No license has been selected. Do not assume the project is open-source licensed until one is added.

@@ -12,7 +12,7 @@ These instructions apply to the entire repository. Read this file before making 
 ## Engineering rules
 
 - Prefer straightforward code and clear names over abstractions, frameworks, and speculative extensibility.
-- Keep UI, state coordination, and persistence responsibilities separate. Do not introduce use-case layers unless a real need emerges.
+- Keep UI, state coordination, and persistence responsibilities separate. Avoid a formal domain/use-case layer without a concrete need.
 - The preview and display must share their text sizing/layout logic. Do not independently tune two separate renderers and call the result an exact preview.
 - Never silently truncate or discard user-entered text.
 - History is local, newest first, and capped at 10 entries. Compare text exactly; do not trim or normalize its content before storing it.
