@@ -1,18 +1,18 @@
 package com.nkoexe.text.ui
 
-import android.content.Context
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,19 +20,27 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,25 +48,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nkoexe.text.R
 import com.nkoexe.text.data.HistoryRecord
-import kotlin.math.abs
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     text: String,
@@ -71,9 +77,8 @@ fun HomeScreen(
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
-    val ratio = remember(context) { landscapeDisplayAspectRatio(context) }
+    val aspectRatio = remember(context) { landscapeDisplayAspectRatio(context) }
     val imeVisible = WindowInsets.isImeVisible
-    val deleteThresholdPx = with(LocalDensity.current) { 72.dp.toPx() }
     var textOverflowsAtMinimum by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -81,85 +86,237 @@ fun HomeScreen(
         keyboardController?.show()
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().background(Color.Black)
-            .safeDrawingPadding().imePadding().padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .imePadding()
     ) {
-        EditablePreview(
-            text = text,
-            onTextChange = onTextChange,
-            aspectRatio = ratio,
-            focusRequester = focusRequester,
-            onOverflowChange = { textOverflowsAtMinimum = it },
-            modifier = Modifier.fillMaxWidth()
-        )
+        val contentWidth = (maxWidth - 40.dp).coerceAtLeast(1.dp)
+        val usableHeight = (maxHeight - 20.dp).coerceAtLeast(1.dp)
+        val heightLimit = usableHeight * if (imeVisible) 0.40f else 0.32f
+        val previewHeight = minOf(contentWidth / aspectRatio, heightLimit)
+        val previewWidth = (previewHeight * aspectRatio).coerceAtMost(contentWidth)
 
-        if (textOverflowsAtMinimum) {
-            Text(
-                text = stringResource(R.string.text_overflow_warning),
-                color = Color(0xFFFFC857),
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            HomeHeader()
 
-        if (!imeVisible && history.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.text_history_section),
-                color = Color.LightGray,
-                style = MaterialTheme.typography.labelMedium
-            )
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(previewHeight),
+                contentAlignment = Alignment.Center
             ) {
-                items(history, key = { it.text }) { item ->
-                    var drag by remember(item.text) { mutableFloatStateOf(0f) }
-                    Box(
-                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF171717))
-                            .pointerInput(item.text, deleteThresholdPx) {
-                                detectHorizontalDragGestures(
-                                    onHorizontalDrag = { _, amount -> drag += amount },
-                                    onDragEnd = {
-                                        if (abs(drag) > deleteThresholdPx) onDeleteHistory(item.text)
-                                        drag = 0f
-                                    }
-                                )
-                            }
-                            .clickable { onSelectHistory(item.text) }
+                EditablePreview(
+                    text = text,
+                    onTextChange = onTextChange,
+                    focusRequester = focusRequester,
+                    onOverflowChange = { textOverflowsAtMinimum = it },
+                    modifier = Modifier
+                        .width(previewWidth)
+                        .height(previewHeight)
+                )
+            }
+
+            if (textOverflowsAtMinimum) {
+                Text(
+                    text = stringResource(R.string.text_overflow_warning),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+
+            if (!imeVisible && history.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.text_history_section),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = stringResource(R.string.text_history_swipe_hint),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelSmall,
+                        letterSpacing = 0.6.sp
+                    )
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(history, key = { it.text }) { item ->
+                        HistoryEntry(
+                            item = item,
+                            onSelect = { onSelectHistory(item.text) },
+                            onDelete = { onDeleteHistory(item.text) },
+                            modifier = Modifier.animateItem()
+                        )
+                    }
+                }
+            } else {
+                Spacer(Modifier.weight(1f))
+            }
+
+            Button(
+                onClick = {
+                    if (text.isNotBlank()) {
+                        keyboardController?.hide()
+                        onShow()
+                    }
+                },
+                enabled = text.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text(
+                    text = stringResource(R.string.text_show_action),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.4.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeHeader() {
+    Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+        Text(
+            text = stringResource(R.string.text_app_name),
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-1.2).sp
+            )
+        )
+        Text(
+            text = stringResource(R.string.text_tagline),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HistoryEntry(
+    item: HistoryRecord,
+    onSelect: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(24.dp)
+    val dismissState = rememberSwipeToDismissBoxState(
+        positionalThreshold = { totalDistance -> totalDistance * 0.30f }
+    )
+
+    LaunchedEffect(dismissState.settledValue) {
+        if (dismissState.settledValue != SwipeToDismissBoxValue.Settled) {
+            onDelete()
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        modifier = modifier.fillMaxWidth(),
+        backgroundContent = {
+            val direction = dismissState.dismissDirection
+            val isSwipingToDelete = direction != SwipeToDismissBoxValue.Settled
+            val backgroundColor by animateColorAsState(
+                targetValue = if (isSwipingToDelete) {
+                    MaterialTheme.colorScheme.errorContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                },
+                animationSpec = spring(),
+                label = "history swipe background"
+            )
+            val alignment = if (direction == SwipeToDismissBoxValue.StartToEnd) {
+                Alignment.CenterStart
+            } else {
+                Alignment.CenterEnd
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(shape)
+                    .background(backgroundColor)
+                    .padding(horizontal = 24.dp),
+                contentAlignment = alignment
+            ) {
+                if (isSwipingToDelete) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
                         Text(
-                            text = item.text.replace("\n", "  ↵  "),
-                            color = Color.White,
-                            maxLines = 2,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)
+                            text = stringResource(R.string.text_delete_action),
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
             }
-        } else {
-            Spacer(modifier = Modifier.weight(1f, fill = true))
         }
-
-        Button(
-            onClick = { if (text.isNotBlank()) { keyboardController?.hide(); onShow() } },
-            enabled = text.isNotBlank(),
-            modifier = Modifier.fillMaxWidth().height(60.dp),
-            shape = RoundedCornerShape(18.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .clickable(onClick = onSelect),
+            shape = shape,
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            tonalElevation = 1.dp
         ) {
-            Text(
-                text = stringResource(R.string.text_show_action),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = item.text.replace("\n", "   ↵   "),
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "›",
+                    modifier = Modifier.padding(start = 12.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
         }
     }
 }
@@ -168,21 +325,23 @@ fun HomeScreen(
 private fun EditablePreview(
     text: String,
     onTextChange: (String) -> Unit,
-    aspectRatio: Float,
     focusRequester: FocusRequester,
     onOverflowChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(30.dp)
     BoxWithConstraints(
-        modifier = modifier.aspectRatio(aspectRatio).clip(shape).background(Color.Black)
-            .border(1.dp, Color(0xFF666666), shape)
+        modifier = modifier
+            .clip(shape)
+            .background(Color.Black)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
     ) {
         val fitting = rememberFittedFontSize(
             text = text,
-            availableWidth = (maxWidth - 20.dp).coerceAtLeast(1.dp),
-            availableHeight = (maxHeight - 20.dp).coerceAtLeast(1.dp)
+            availableWidth = (maxWidth - 24.dp).coerceAtLeast(1.dp),
+            availableHeight = (maxHeight - 24.dp).coerceAtLeast(1.dp)
         )
+
         LaunchedEffect(fitting.fitsAtMinimum) {
             onOverflowChange(!fitting.fitsAtMinimum)
         }
@@ -190,9 +349,13 @@ private fun EditablePreview(
         BasicTextField(
             value = text,
             onValueChange = onTextChange,
-            modifier = Modifier.fillMaxSize().focusRequester(focusRequester).padding(10.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .focusRequester(focusRequester)
+                .padding(12.dp),
             textStyle = TextStyle(
                 color = Color.White,
+                fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
                 fontSize = fitting.size,
                 textAlign = TextAlign.Center,
                 lineHeight = (fitting.size.value * 1.08f).sp
@@ -210,7 +373,7 @@ private fun EditablePreview(
     }
 }
 
-private fun landscapeDisplayAspectRatio(context: Context): Float {
+private fun landscapeDisplayAspectRatio(context: android.content.Context): Float {
     val metrics = context.resources.displayMetrics
     val longer = maxOf(metrics.widthPixels, metrics.heightPixels).toFloat()
     val shorter = minOf(metrics.widthPixels, metrics.heightPixels).toFloat().coerceAtLeast(1f)

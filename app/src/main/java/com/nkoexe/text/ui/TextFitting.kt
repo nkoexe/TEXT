@@ -1,5 +1,6 @@
 package com.nkoexe.text.ui
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalDensity
@@ -17,7 +18,7 @@ internal data class FittedFont(
     val fitsAtMinimum: Boolean
 )
 
-/** Measures real width and height constraints and chooses the largest fitting font. */
+/** Measures width and height using the same typeface used by the editor and display. */
 @Composable
 internal fun rememberFittedFontSize(
     text: String,
@@ -30,12 +31,14 @@ internal fun rememberFittedFontSize(
     val heightPx = with(density) { availableHeight.roundToPx() }.coerceAtLeast(1)
     val maximum = (availableHeight.value * 0.62f)
         .coerceAtLeast(FontFitPolicy.MINIMUM_FONT_SIZE_SP)
+    val fontFamily = MaterialTheme.typography.bodyLarge.fontFamily
 
-    val result = remember(text, widthPx, heightPx, density.fontScale, maximum, textMeasurer) {
+    val result = remember(text, widthPx, heightPx, density.fontScale, maximum, textMeasurer, fontFamily) {
         FontFitPolicy.largestFitting(maximum) { fontSize ->
             val layout = textMeasurer.measure(
                 text = AnnotatedString(text),
                 style = TextStyle(
+                    fontFamily = fontFamily,
                     fontSize = fontSize.sp,
                     lineHeight = (fontSize * 1.08f).sp,
                     textAlign = TextAlign.Center

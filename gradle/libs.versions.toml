@@ -28,6 +28,7 @@ compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4
 compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }

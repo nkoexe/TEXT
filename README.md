@@ -6,10 +6,11 @@ A minimal offline Android app for typing text, previewing it in a landscape-shap
 
 - Native Kotlin + Jetpack Compose + Material 3; Android 8.0 (API 26)+.
 - Multiline editor with a live landscape-proportioned preview.
+- Outfit typography with a dark, expressive Material 3 visual system.
 - Measured font fitting down to a minimum of 18sp; the editor warns when text still cannot fit.
 - One-tap immersive landscape display; Back returns to portrait editing.
-- Local on-device history: newest first, exact duplicates move to the top, capped at 10 entries. Tap to reuse; swipe horizontally to delete.
-- No accounts, network access, analytics, or external storage.
+- Local on-device history: newest first, exact duplicates move to the top, capped at 10 entries. Tap to reuse; swipe to delete with a visible delete reveal and dismissal motion.
+- No accounts, network access, analytics, or external storage at runtime.
 
 ## Build and verify
 
@@ -23,9 +24,11 @@ gradle compileDebugAndroidTestKotlin
 gradle connectedDebugAndroidTest # requires a running emulator/device
 ```
 
-The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`. GitHub Actions uploads it as the `TEXT-debug-apk` artifact before running JVM unit tests, lint, and instrumentation-test compilation. The artifact is retained for 14 days, including when a later test assertion fails. A build/compilation failure cannot produce an APK.
+The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`. GitHub Actions uploads it as the `TEXT-debug-apk` artifact before running JVM unit tests, lint, and instrumentation-test compilation. The artifact is retained for 14 days, including when a later test assertion fails.
 
-The separate Android Instrumented Tests workflow now runs automatically on pushes and pull requests targeting `main`, and can also be triggered manually. It boots an API 35 emulator and runs repository persistence tests and Compose UI smoke tests. The repository still uses installed Gradle rather than the Gradle Wrapper; `./gradlew` is not available until the official wrapper is checked in.
+The Outfit font is retrieved from a pinned Google Fonts commit on a clean build and verified against its Git blob SHA-1 before it is packaged as an Android resource. This build-time download requires network access on a clean checkout; the app itself makes no network requests. The font's SIL Open Font License is included at `licenses/Outfit-OFL.txt`.
+
+The connected API 35 instrumentation workflow runs repository persistence and Compose home tests. It can be started manually from the Actions tab.
 
 ## Documentation
 
@@ -37,4 +40,4 @@ The separate Android Instrumented Tests workflow now runs automatically on pushe
 
 ## License
 
-No license has been selected. Do not assume the project is open-source licensed until one is added.
+No license has been selected for the application source. The Outfit font retains its own license, included in `licenses/Outfit-OFL.txt`.
