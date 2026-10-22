@@ -4,8 +4,8 @@
 
 - JDK 17.
 - Android SDK Platform 36 and Build Tools 36.0.0.
-- Gradle 8.13 (installed separately for now; the official Gradle Wrapper is not checked in yet).
-- Network access for initial dependency resolution.
+- Gradle 8.13 (installed separately; the official Gradle Wrapper is not checked in yet).
+- Network access for Gradle dependency resolution and for fetching the pinned Outfit font on a clean build.
 
 ## Build and test
 
@@ -17,9 +17,11 @@ gradle compileDebugAndroidTestKotlin
 gradle connectedDebugAndroidTest # requires a running emulator/device
 ```
 
-The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`. The default GitHub Actions workflow builds and uploads it before running JVM unit tests, Android lint, and instrumentation-test source compilation, so a later assertion failure does not discard a valid APK. The artifact is retained for 14 days.
+The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`. CI uploads it before JVM unit tests, Android lint, and instrumentation-test source compilation. The artifact is retained for 14 days.
 
-The connected instrumentation suite (history persistence, delete semantics, and Compose home smoke tests) runs automatically on pushes and pull requests targeting `main` in the Android Instrumented Tests workflow. It uses an API 35 emulator and uploads test reports even if the tests fail.
+The Outfit font is downloaded from a pinned Google Fonts commit during `preBuild`, checked against the expected Git blob SHA-1, and placed in generated Android resources. It is packaged into the APK; no font request is made at runtime. Its SIL Open Font License is at `licenses/Outfit-OFL.txt`.
+
+The connected instrumentation suite runs on an API 35 emulator. It covers SQLite persistence and basic Compose home behavior. Emulator startup may fail on shared runners independently of app compilation.
 
 Open the repository root in Android Studio and allow Gradle sync to finish. Do not commit `local.properties`, generated build output, SDK paths, or signing credentials.
 
