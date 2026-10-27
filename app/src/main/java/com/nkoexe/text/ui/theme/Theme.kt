@@ -22,9 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nkoexe.text.R
 
-// Register the same variable font at each supported weight. A single Font(R.font.outfit)
-// declaration fixes the variation axis at its declared weight, so TextStyle weights can
-// otherwise look suspiciously thin even when they request Bold/ExtraBold.
+// Use the raw variable TTF, not the XML family wrapper. The wrapper only declared nominal
+// weights for the same file without setting its "wght" axis; Compose therefore did not get
+// explicit variable-font instances for requested weights.
 @OptIn(ExperimentalTextApi::class)
 private val OutfitFontFamily = FontFamily(
     Font(R.font.outfit_variable, weight = FontWeight.Thin, variationSettings = FontVariation.Settings(FontVariation.weight(100))),
