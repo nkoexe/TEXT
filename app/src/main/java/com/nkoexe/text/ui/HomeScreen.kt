@@ -3,7 +3,6 @@ package com.nkoexe.text.ui
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -106,13 +105,8 @@ fun HomeScreen(
         val contentWidth = (maxWidth - horizontalPadding * 2).coerceAtLeast(1.dp)
         // Keep preview geometry tied to the display aspect ratio, not keyboard visibility.
         val previewHeight = (contentWidth / aspectRatio).coerceAtLeast(1.dp)
-        // Keep history secondary on a tall screen, and compact it further while the IME is open.
-        val historyHeight = when {
-            maxHeight < 560.dp && history.isEmpty() -> 92.dp
-            maxHeight < 560.dp -> 124.dp
-            history.isEmpty() -> 104.dp
-            else -> 176.dp
-        }
+        // Keep the list compact, especially while the keyboard reduces available space.
+        val historyHeight = if (maxHeight < 560.dp) 124.dp else 176.dp
 
         Column(
             modifier = Modifier
@@ -202,14 +196,16 @@ fun HomeScreen(
                 }
             }
 
-            HistoryPanel(
-                history = history,
-                onSelectHistory = onSelectHistory,
-                onDeleteHistory = onDeleteHistory,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(historyHeight)
-            )
+            if (history.isNotEmpty()) {
+                HistoryPanel(
+                    history = history,
+                    onSelectHistory = onSelectHistory,
+                    onDeleteHistory = onDeleteHistory,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(historyHeight)
+                )
+            }
 
             Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 Spacer(Modifier.weight(1f))
@@ -239,9 +235,11 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.text_show_action),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.2.sp
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.2.sp
+                            )
                         )
                         Spacer(Modifier.weight(1f))
                         Icon(
@@ -263,61 +261,27 @@ private fun HistoryPanel(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.text_history_section),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Medium
-            )
-        }
+        Text(
+            text = stringResource(R.string.text_history_section),
+            modifier = Modifier.padding(bottom = 8.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Medium
+        )
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-            border = BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-            )
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            contentPadding = PaddingValues(0.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp)
         ) {
-            if (history.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_history_empty),
-                        contentDescription = stringResource(R.string.text_history_empty_title),
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(7.dp)
-                ) {
-                    itemsIndexed(history, key = { _, item -> item.text }) { index, item ->
-                        HistoryEntry(
-                            item = item,
-                            index = index,
-                            onSelect = { onSelectHistory(item.text) },
-                            onDelete = { onDeleteHistory(item.text) },
-                            modifier = Modifier.animateItem()
-                        )
-                    }
-                }
+            itemsIndexed(history, key = { _, item -> item.text }) { index, item ->
+                HistoryEntry(
+                    item = item,
+                    index = index,
+                    onSelect = { onSelectHistory(item.text) },
+                    onDelete = { onDeleteHistory(item.text) },
+                    modifier = Modifier.animateItem()
+                )
             }
         }
     }
