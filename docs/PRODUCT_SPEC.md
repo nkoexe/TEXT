@@ -16,15 +16,15 @@ TEXT is a minimal Android utility for composing a short message and presenting i
 ## Home screen
 
 - Use Material You dynamic system colors on Android 12+; fall back to coordinated Material color schemes that follow the system light/dark setting on older versions.
-- Use the Outfit typeface throughout Compose, expressive typography, rounded Material shapes, and tonal surfaces.
+- Use Outfit variable typography throughout Compose, with explicit weight-axis mappings so requested weights render as designed. Give the SHOW label a clearly heavy Black weight. Retain expressive typography, rounded Material shapes, and tonal surfaces.
 - Show three icon-only Material controls for text color, background fill, and font. Keep accessible content descriptions; these controls have no behavior yet and the current display remains white text on black.
 - Start with an empty text canvas; do not show a placeholder prompt or character counter.
 - The black, rounded message canvas is both the multiline editor and a live preview of the fullscreen message, with text centered horizontally and vertically.
 - Keep the editor canvas full available width and derive its height from the device landscape aspect ratio. Canvas geometry must not change when the software keyboard opens.
 - Focus the editor and open the keyboard on launch and when returning from display.
-- Keep Recent visible while typing, but visually subordinate it to the editor: use a compact, responsive, height-bounded panel that shrinks when the keyboard reduces available space. The list scrolls independently; do not let the panel claim all remaining vertical space.
+- Show Recent only when history is non-empty. Render the entries directly as a standalone list with no enclosing bordered container; keep it compact, height-bounded, and independently scrollable when the keyboard is open.
 - Keep the SHOW action visible. Empty/whitespace-only content cannot be displayed.
-- When history is empty, show a subtle Material crossed-circle icon with an accessible “Nothing here yet” description instead of visible empty-state text.
+- Hide the entire Recent section when history is empty; do not reserve blank space or show an empty-state icon.
 
 ## Preview and display parity
 
