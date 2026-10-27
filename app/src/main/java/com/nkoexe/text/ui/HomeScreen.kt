@@ -1,6 +1,7 @@
 package com.nkoexe.text.ui
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -45,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,7 +54,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -66,6 +70,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nkoexe.text.R
 import com.nkoexe.text.data.HistoryRecord
+import kotlinx.coroutines.flow.collect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -318,9 +323,23 @@ private fun HistoryEntry(
     modifier: Modifier = Modifier
 ) {
     val shape = MaterialTheme.shapes.large
+    val hapticFeedback = LocalHapticFeedback.current
+    var thresholdHapticPlayed by remember { mutableStateOf(false) }
     val dismissState = rememberSwipeToDismissBoxState(
-        positionalThreshold = { totalDistance -> totalDistance * 0.30f }
+        // A slightly longer travel distance gives the gesture a deliberate, tactile commitment.
+        positionalThreshold = { totalDistance -> totalDistance * 0.36f }
     )
+
+    LaunchedEffect(dismissState) {
+        snapshotFlow { dismissState.targetValue }.collect { target ->
+            if (target == SwipeToDismissBoxValue.Settled) {
+                thresholdHapticPlayed = false
+            } else if (!thresholdHapticPlayed) {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                thresholdHapticPlayed = true
+            }
+        }
+    }
 
     LaunchedEffect(dismissState.settledValue) {
         if (dismissState.settledValue != SwipeToDismissBoxValue.Settled) {
@@ -340,7 +359,10 @@ private fun HistoryEntry(
                 } else {
                     MaterialTheme.colorScheme.surfaceContainerHigh
                 },
-                animationSpec = spring(),
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                ),
                 label = "history swipe background"
             )
             val alignment = if (direction == SwipeToDismissBoxValue.StartToEnd) {
@@ -470,18 +492,6 @@ private fun EditablePreview(
             maxLines = Int.MAX_VALUE,
             decorationBox = { innerTextField ->
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    if (text.isEmpty()) {
-                        Text(
-                            text = stringResource(R.string.text_editor_placeholder),
-                            color = Color.White.copy(alpha = 0.62f),
-                            textAlign = TextAlign.Center,
-                            style = TextStyle(
-                                fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
-                                fontSize = fitting.size,
-                                lineHeight = (fitting.size.value * 1.08f).sp
-                            )
-                        )
-                    }
                     innerTextField()
                 }
             }

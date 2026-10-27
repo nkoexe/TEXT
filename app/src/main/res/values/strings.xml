@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_app_name">TEXT</string>
-    <string name="text_editor_placeholder">Start typing…</string>
     <string name="text_show_action">SHOW</string>
     <string name="text_history_section">Recent</string>
     <string name="text_tool_text_color">Text color</string>
