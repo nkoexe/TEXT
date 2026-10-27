@@ -17,14 +17,14 @@ TEXT is a minimal Android utility for composing a short message and presenting i
 
 - Use Material You dynamic system colors on Android 12+; fall back to coordinated Material color schemes that follow the system light/dark setting on older versions.
 - Use the Outfit typeface throughout Compose, expressive typography, rounded Material shapes, and tonal surfaces.
-- Show three toolbar placeholders: Text color, Background, and Font. These controls have no implemented behavior yet; the current display remains white text on black.
+- Show three icon-only Material controls for text color, background fill, and font. Keep accessible content descriptions; these controls have no behavior yet and the current display remains white text on black.
 - Start with an empty text canvas; do not show a placeholder prompt or character counter.
 - The black, rounded message canvas is both the multiline editor and a live preview of the fullscreen message, with text centered horizontally and vertically.
 - Keep the editor canvas full available width and derive its height from the device landscape aspect ratio. Canvas geometry must not change when the software keyboard opens.
 - Focus the editor and open the keyboard on launch and when returning from display.
-- Keep the Recent history section visible at all times, including while the keyboard is open. The list scrolls independently in its own constrained panel and takes the remaining vertical space.
+- Keep Recent visible while typing, but visually subordinate it to the editor: use a compact, responsive, height-bounded panel that shrinks when the keyboard reduces available space. The list scrolls independently; do not let the panel claim all remaining vertical space.
 - Keep the SHOW action visible. Empty/whitespace-only content cannot be displayed.
-- Show only the concise “Nothing here yet” empty-history message before the first item is available.
+- When history is empty, show a subtle Material crossed-circle icon with an accessible “Nothing here yet” description instead of visible empty-state text.
 
 ## Preview and display parity
 
@@ -55,7 +55,7 @@ TEXT is a minimal Android utility for composing a short message and presenting i
 
 ## Out of scope / current limitations
 
-No functional color/font customization, settings screen, sharing, synchronization, account system, telemetry, ads, unnecessary permissions, or Play Store release pipeline. The three toolbar controls are placeholders only. Dynamic color and light/dark appearance follow Android system settings automatically.
+No functional color/font customization, settings screen, sharing, synchronization, account system, telemetry, ads, unnecessary permissions, or Play Store release pipeline. The three icon-only toolbar controls are placeholders only. Dynamic color and light/dark appearance follow Android system settings automatically.
 
 ## Acceptance criteria
 
