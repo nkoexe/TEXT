@@ -24,7 +24,7 @@ import com.nkoexe.text.R
 
 // Register the same variable font at each supported weight. A single Font(R.font.outfit)
 // declaration fixes the variation axis at its declared weight, so TextStyle weights can
- // otherwise look suspiciously thin even when they request Bold/ExtraBold.
+// otherwise look suspiciously thin even when they request Bold/ExtraBold.
 @OptIn(ExperimentalTextApi::class)
 private val OutfitFontFamily = FontFamily(
     Font(R.font.outfit, weight = FontWeight.Thin, variationSettings = FontVariation.Settings(FontVariation.weight(100))),
