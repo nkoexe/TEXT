@@ -235,11 +235,9 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.text_show_action),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.2.sp
-                            )
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.2.sp
                         )
                         Spacer(Modifier.weight(1f))
                         Icon(
