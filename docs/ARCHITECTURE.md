@@ -1,24 +1,36 @@
 # Architecture
 
 ## Principles
+
 - One Activity with a small number of Compose screens.
 - Keep UI state coordination separate from persistence.
-- Keep all data local. No network stack or Internet permission.
+- Keep all user data local. There is no app runtime network stack or Internet permission.
 - Use deterministic pure policies for behavior that can be tested on the JVM.
 - Avoid a formal domain/use-case layer without a concrete need.
 
 ## Responsibilities
-- MainActivity.kt: entry point, editor/display state, orientation and system-bar transitions.
-- ui/HomeScreen.kt: responsive editor, landscape-shaped preview, persistent scrollable history panel, and SHOW action.
-- ui/DisplayScreen.kt: immersive landscape rendering.
-- ui/TextFitting.kt: shared measured font-fit implementation used by editor and display.
-- ui/FontFitPolicy.kt: pure binary-search policy, including minimum-size overflow status.
-- ui/theme/Theme.kt: Outfit typography, expressive shape scale, Android 12+ dynamic Material You colors, and system-aware fallback palettes.
-- data/HistoryPolicy.kt: pure rules for exact matching, duplicate promotion, ordering, and the ten-entry limit.
-- data/HistoryRepository.kt: app-private SQLite database and transactional persistence.
-- HomeViewModel.kt: serializes history operations, performs database work off the main thread, and exposes observable history state.
+
+- `MainActivity.kt`: entry point, editor/display state, portrait/landscape transitions, system-bar styling, and keep-screen-on lifecycle.
+- `HomeViewModel.kt`: serializes history operations, performs database work off the main thread, and exposes observable history state.
+- `ui/HomeScreen.kt`: blank multiline editor, formatting placeholder toolbar, landscape preview, persistent scrollable history panel, and SHOW action. Owns swipe-to-delete threshold haptics and transition styling.
+- `ui/DisplayScreen.kt`: immersive landscape rendering with centered white text on black.
+- `ui/TextFitting.kt`: shared measured font-fit implementation used by editor and display.
+- `ui/FontFitPolicy.kt`: pure binary-search policy, including minimum-size overflow status.
+- `ui/theme/Theme.kt`: Outfit typography, expressive shape scale, Android 12+ dynamic Material You colors, and system-aware fallback palettes.
+- `data/HistoryPolicy.kt`: pure rules for exact matching, duplicate promotion, ordering, and the ten-entry limit.
+- `data/HistoryRepository.kt`: app-private SQLite database and transactional persistence.
+
+## UI behavior
+
+- Compose typography uses Outfit. The editor and fullscreen message canvas remain black with white text; the surrounding interface uses wallpaper-derived dynamic colors on Android 12+ and system light/dark fallback palettes on older versions.
+- The Text color, Background, and Font toolbar buttons are presentation-only placeholders. They currently have empty click handlers and do not change text appearance.
+- The editor canvas is blank before text is entered. It fills the available content width; its height is derived from that width and the device's landscape display aspect ratio, not keyboard visibility.
+- History remains visible while the keyboard is open and scrolls inside its own constrained panel. The history panel takes the remaining vertical space.
+- A history swipe uses a 36% positional threshold. When the dismissal target is reached, the UI requests one gesture-threshold haptic per attempt; a restrained spring animates the delete-reveal color. This is a platform haptic request and device behavior still needs physical verification.
+- SHOW rejects blank/whitespace-only text, records valid displayed text, then enters display mode.
 
 ## History storage contract
+
 - Reject blank/whitespace-only text.
 - Keep exact text (no trimming, normalization, or case folding).
 - Promote exact duplicates and refresh their timestamp.
@@ -29,18 +41,16 @@
 
 The small fixed history limit makes replacing ten rows transactionally a straightforward choice. A failed transaction rolls back as a unit.
 
-## UI behavior
-- The home editor follows the system light/dark setting and uses wallpaper-based dynamic colors on Android 12+.
-- The message canvas and fullscreen display remain black with white text so the preview mirrors what is shown to another person.
-- History remains visible while the keyboard is open and scrolls independently. The editor canvas retains the same full content width and landscape aspect ratio regardless of keyboard visibility; history absorbs the reduced vertical space.
-- The display transitions to immersive landscape and restores the themed system bars when returning home.
-
 ## Preview/display sizing
-Both screens use TextMeasurer against actual width and height constraints, then binary-search for the largest font that fits down to 18sp. When even 18sp overflows, the editor shows a warning and the display keeps the minimum rather than silently shrinking the type to an unreadable size. Line wrapping and preview/display parity still require device verification across font scales and aspect ratios.
+
+Both screens use TextMeasurer against actual width and height constraints, then binary-search for the largest font that fits down to 18sp. The maximum candidate is based on available canvas height. When even 18sp overflows, the editor shows a warning and the display keeps the minimum rather than silently shrinking the type to an unreadable size.
+
+The implementation shares the measurement policy and typeface, but line wrapping and preview/display parity still require on-device checks across font scales, densities, keyboard configurations, and aspect ratios.
 
 ## Android window lifecycle
-- Home remains portrait.
-- Display requests landscape and immersive system-bar behavior.
+
+- Home is portrait; display requests landscape and hides the system bars with transient system-gesture reveal enabled.
 - Keep-screen-on is enabled only during display.
-- Back returns to the editor and restores orientation/system bars.
-- Preserve editor content through configuration changes and process recreation where feasible.
+- Back returns to the editor and restores portrait orientation/system bars.
+- Editor text and display state use `rememberSaveable`; history is persisted separately in SQLite.
+- The Activity declares orientation/screen/keyboard configuration changes in the manifest. Orientation, Back, keyboard reopening, and system-bar restoration still need device-level regression checks.

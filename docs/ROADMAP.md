@@ -1,34 +1,53 @@
-# Roadmap
+# Roadmap and validation status
 
-Implementation checklist. Only mark behavior complete after it is tested on a device/emulator.
+Last reviewed: 2026-10-27.
 
-## Repository and CI
-- [x] Compose project scaffold and agent/product documentation.
-- [x] Default CI builds and uploads the debug APK, runs JVM unit tests and Android lint, and compiles instrumentation tests.
-- [x] Instrumented API 35 emulator tests run on pushes and pull requests and upload reports.
-- [ ] Add official Gradle Wrapper and verify wrapper-based CI.
-- [ ] Confirm all CI workflows are green on the current PR.
+This checklist distinguishes implementation from device validation. A checked implementation item means the code or test source exists; it does not claim that runtime behavior has been verified on a physical device.
 
-## History
-- [x] Persist history locally in a private on-device SQLite database.
-- [x] Keep duplicate handling, ordering, and ten-entry limit in one pure history policy.
-- [x] Unit tests for blank input, exact matching, promotion, timestamp replacement, duplicate cleanup, and cap/eviction.
-- [x] Deterministic invariant-style policy tests over messy legacy inputs and repeated identical displays.
-- [x] Instrumentation tests for persistence across database reopen, exact-match deletion, blank input, cap, and clock-independent ordering.
-- [x] Tap to load, swipe horizontally to delete, and hide history while the IME is visible.
-- [ ] Verify history behavior on Android 8 and a current Android release.
+## Implemented
 
-## Editor and display
-- [x] Multiline editor, live landscape-shaped preview, initial focus, SHOW validation.
-- [x] Immersive landscape display and keep-screen-on while displayed.
-- [x] Measure available width/height and binary-search font sizes with an 18sp minimum.
-- [x] Warn in the editor when content still overflows at 18sp.
-- [x] Unit-test font-fit boundary conditions and invalid input.
-- [ ] Verify line wrapping, font scale/density behavior, and preview/display parity on multiple device sizes.
-- [ ] Verify Back and lifecycle exit paths restore orientation/system bars and reopen the keyboard.
-- [ ] Verify SHOW remains reachable on small screens and with large keyboards/font scales.
+### Repository and CI
 
-## Release readiness
-- [ ] Expand UI tests beyond the home smoke and validation tests to edit/show/back/history flows.
-- [ ] Add a release APK workflow and secure signing setup when signing details are decided.
-- [ ] Review dependency footprint, manifest, and privacy behavior.
+- [x] Native Kotlin/Compose project for Android API 26+.
+- [x] Centralized plugin and dependency versions in `gradle/libs.versions.toml`.
+- [x] Default CI builds the debug APK, uploads it as `TEXT-debug-apk`, runs JVM unit tests, and runs Android lint.
+- [x] CI intentionally avoids emulator startup. Artifacts are retained for 14 days.
+- [ ] Add the official Gradle Wrapper and verify wrapper-based CI.
+- [ ] Add a release APK/signing workflow after signing and key-recovery decisions are made.
+
+### History
+
+- [x] Persist up to ten unique messages in an app-private SQLite database.
+- [x] Keep exact-match duplicate handling, promotion, ordering, blank rejection, and the history cap in the pure `HistoryPolicy`.
+- [x] JVM unit tests cover exact text matching, whitespace/newlines, promotion, timestamps, eviction, duplicate cleanup, cap, and invariant-style generated inputs.
+- [x] UI supports tap-to-load and horizontal swipe-to-delete.
+- [x] History stays visible while typing; the list scrolls independently and absorbs available vertical space.
+- [x] Swipe dismissal uses a 36% positional threshold and requests a gesture-threshold haptic once per threshold-crossing attempt.
+- [ ] Verify actual haptic strength/availability and delete-gesture feel on a physical device.
+- [ ] Verify history persistence and interactions on Android 8 and a current Android release.
+
+### Editor, appearance, and display
+
+- [x] Blank multiline editor and landscape-shaped preview; no placeholder text or character counter.
+- [x] Preview width and landscape aspect ratio are independent of keyboard visibility.
+- [x] Outfit is applied to all Compose Material typography roles and used by both editor and fullscreen text.
+- [x] Dynamic Material You color on Android 12+ and system-aware light/dark fallback palettes on older versions.
+- [x] Formatting toolbar placeholders for Text color, Background, and Font; these buttons are intentionally inert.
+- [x] Fullscreen black/white message display, landscape orientation request, immersive system bars, and keep-screen-on behavior.
+- [x] Pure font-fit policy tests cover boundary cases and invalid input.
+- [ ] Verify keyboard opening/closing, fixed canvas geometry, and SHOW reachability with different keyboard heights, screen sizes, and font scales.
+- [ ] Verify line wrapping and preview/display parity at multiple display densities/aspect ratios.
+- [ ] Verify Back, orientation restoration, keyboard reopening, and system-bar lifecycle behavior on a device.
+
+## Test status and limits
+
+- JVM tests, debug APK build, and lint are part of standard CI and passed on the code commit immediately before this documentation review. Check the Actions run for the latest documentation commit before treating the repository as green.
+- Instrumentation test source remains under `app/src/androidTest` for home-screen smoke/validation and SQLite repository behavior. It is not compiled or executed by the default workflow and has no active emulator workflow.
+- No device/emulator validation is implied by a passing standard CI run.
+
+## Privacy and distribution
+
+- [x] Manifest declares no runtime permissions; app runtime does not perform network requests or use external storage.
+- [x] Outfit's SIL Open Font License is included at `licenses/Outfit-OFL.txt`.
+- [ ] Decide whether to select a license for the app source.
+- [ ] Decide release signing and APK distribution process.
