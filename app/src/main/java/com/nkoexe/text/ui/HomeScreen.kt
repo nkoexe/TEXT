@@ -213,7 +213,7 @@ fun HomeScreen(
 
             Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 Spacer(Modifier.weight(1f))
-                    Button(
+                Button(
                     onClick = {
                         if (text.isNotBlank()) {
                             keyboardController?.hide()
