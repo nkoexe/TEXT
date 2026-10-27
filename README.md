@@ -8,8 +8,8 @@ A small offline Android app for composing a message, previewing it in a landscap
 - Outfit typography across the Compose UI.
 - Material You wallpaper-derived colors on Android 12+, with system-aware light/dark fallbacks on older Android versions.
 - A blank, multiline editor canvas with centered white text on black. Its width and landscape aspect ratio stay constant when the keyboard opens.
-- Three visible formatting placeholders—**Text color**, **Background**, and **Font**—which are not functional yet.
-- Recent history stays visible while typing, scrolls independently, and holds at most 10 entries. Tap to reuse; swipe horizontally to delete.
+- Three compact, icon-only Material formatting placeholders for text color, background fill, and font, with accessible descriptions; customization is not functional yet.
+- The compact Recent panel stays visible while typing, scrolls independently, and holds at most 10 entries. Empty history uses a subtle Material crossed-circle icon; tap entries to reuse, swipe to delete.
 - Swipe deletion has a firmer threshold, a single threshold haptic request, and restrained color-transition feedback.
 - Measured font fitting down to 18sp; the editor warns if text still overflows at the minimum size.
 - One-tap immersive landscape display; Back returns to portrait editing.
