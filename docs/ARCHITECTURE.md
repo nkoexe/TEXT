@@ -12,7 +12,7 @@
 
 - `MainActivity.kt`: entry point, editor/display state, portrait/landscape transitions, system-bar styling, and keep-screen-on lifecycle.
 - `HomeViewModel.kt`: serializes history operations, performs database work off the main thread, and exposes observable history state.
-- `ui/HomeScreen.kt`: blank multiline editor, formatting placeholder toolbar, landscape preview, persistent scrollable history panel, and SHOW action. Owns swipe-to-delete threshold haptics and transition styling.
+- `ui/HomeScreen.kt`: blank multiline editor, icon-only formatting placeholders, landscape preview, compact independently scrollable history panel, and SHOW action. Owns swipe-to-delete threshold haptics and transition styling.
 - `ui/DisplayScreen.kt`: immersive landscape rendering with centered white text on black.
 - `ui/TextFitting.kt`: shared measured font-fit implementation used by editor and display.
 - `ui/FontFitPolicy.kt`: pure binary-search policy, including minimum-size overflow status.
@@ -23,9 +23,9 @@
 ## UI behavior
 
 - Compose typography uses Outfit. The editor and fullscreen message canvas remain black with white text; the surrounding interface uses wallpaper-derived dynamic colors on Android 12+ and system light/dark fallback palettes on older versions.
-- The Text color, Background, and Font toolbar buttons are presentation-only placeholders. They currently have empty click handlers and do not change text appearance.
+- The icon-only Text color, Background fill, and Font controls use locally bundled Material vectors and accessible descriptions. They remain presentation-only placeholders with empty click handlers.
 - The editor canvas is blank before text is entered. It fills the available content width; its height is derived from that width and the device's landscape display aspect ratio, not keyboard visibility.
-- History remains visible while the keyboard is open and scrolls inside its own constrained panel. The history panel takes the remaining vertical space.
+- History remains visible while the keyboard is open and scrolls independently inside a compact, responsive panel with a bounded height; it does not consume all remaining vertical space.
 - A history swipe uses a 36% positional threshold. When the dismissal target is reached, the UI requests one gesture-threshold haptic per attempt; a restrained spring animates the delete-reveal color. This is a platform haptic request and device behavior still needs physical verification.
 - SHOW rejects blank/whitespace-only text, records valid displayed text, then enters display mode.
 
