@@ -1,12 +1,18 @@
 package com.nkoexe.text.ui.theme
 
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -18,9 +24,21 @@ private val OutfitFontFamily = FontFamily(Font(R.font.outfit))
 private val DefaultTypography = Typography()
 
 private val OutfitTypography = Typography(
-    displayLarge = DefaultTypography.displayLarge.copy(fontFamily = OutfitFontFamily, fontWeight = FontWeight.Bold),
-    displayMedium = DefaultTypography.displayMedium.copy(fontFamily = OutfitFontFamily, fontWeight = FontWeight.Bold),
-    displaySmall = DefaultTypography.displaySmall.copy(fontFamily = OutfitFontFamily, fontWeight = FontWeight.Bold),
+    displayLarge = DefaultTypography.displayLarge.copy(
+        fontFamily = OutfitFontFamily,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = (-1.0).sp
+    ),
+    displayMedium = DefaultTypography.displayMedium.copy(
+        fontFamily = OutfitFontFamily,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = (-0.6).sp
+    ),
+    displaySmall = DefaultTypography.displaySmall.copy(
+        fontFamily = OutfitFontFamily,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = (-0.4).sp
+    ),
     headlineLarge = DefaultTypography.headlineLarge.copy(fontFamily = OutfitFontFamily),
     headlineMedium = DefaultTypography.headlineMedium.copy(fontFamily = OutfitFontFamily),
     headlineSmall = DefaultTypography.headlineSmall.copy(fontFamily = OutfitFontFamily),
@@ -36,11 +54,11 @@ private val OutfitTypography = Typography(
 )
 
 private val ExpressiveShapes = Shapes(
-    extraSmall = RoundedCornerShape(10.dp),
-    small = RoundedCornerShape(14.dp),
-    medium = RoundedCornerShape(20.dp),
-    large = RoundedCornerShape(28.dp),
-    extraLarge = RoundedCornerShape(36.dp)
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(18.dp),
+    large = RoundedCornerShape(26.dp),
+    extraLarge = RoundedCornerShape(34.dp)
 )
 
 private val TextDarkColors = darkColorScheme(
@@ -75,10 +93,53 @@ private val TextDarkColors = darkColorScheme(
     onErrorContainer = Color(0xFFFFDAD6)
 )
 
+private val TextLightColors = lightColorScheme(
+    primary = Color(0xFF6750A4),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFEADDFF),
+    onPrimaryContainer = Color(0xFF21005D),
+    secondary = Color(0xFF625B71),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE8DEF8),
+    onSecondaryContainer = Color(0xFF1D192B),
+    tertiary = Color(0xFF8A4F63),
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFFFD8E4),
+    onTertiaryContainer = Color(0xFF31111D),
+    background = Color(0xFFF8F5FC),
+    onBackground = Color(0xFF1B1B21),
+    surface = Color(0xFFF8F5FC),
+    onSurface = Color(0xFF1B1B21),
+    surfaceVariant = Color(0xFFE7E0EB),
+    onSurfaceVariant = Color(0xFF49454F),
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFF2EDF7),
+    surfaceContainer = Color(0xFFEDE7F2),
+    surfaceContainerHigh = Color(0xFFE7E1EC),
+    surfaceContainerHighest = Color(0xFFE1DBE6),
+    outline = Color(0xFF79747E),
+    outlineVariant = Color(0xFFCAC4D0),
+    error = Color(0xFFBA1A1A),
+    onError = Color.White,
+    errorContainer = Color(0xFFF9DEDC),
+    onErrorContainer = Color(0xFF410E0B)
+)
+
 @Composable
 fun TextTheme(content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val darkTheme = isSystemInDarkTheme()
+    val colorScheme = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && darkTheme ->
+            dynamicDarkColorScheme(context)
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            dynamicLightColorScheme(context)
+        darkTheme -> TextDarkColors
+        else -> TextLightColors
+    }
+
     MaterialTheme(
-        colorScheme = TextDarkColors,
+        colorScheme = colorScheme,
         typography = OutfitTypography,
         shapes = ExpressiveShapes,
         content = content
