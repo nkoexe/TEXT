@@ -41,8 +41,8 @@ This checklist distinguishes implementation from device validation. A checked im
 
 ## Test status and limits
 
-- JVM tests, debug APK build, and lint are part of standard CI and passed on the code commit immediately before this documentation review. Check the Actions run for the latest documentation commit before treating the repository as green.
-- Instrumentation test source remains under `app/src/androidTest` for home-screen smoke/validation and SQLite repository behavior. It is not compiled or executed by the default workflow and has no active emulator workflow.
+- Standard CI builds and uploads the debug APK, runs JVM unit tests, and runs Android lint. Check GitHub Actions for the result on the current commit.
+- Instrumentation test source remains under `app/src/androidTest` for home-screen smoke/validation and SQLite repository behavior. It is not run by the default workflow and there is no active emulator workflow.
 - No device/emulator validation is implied by a passing standard CI run.
 
 ## Privacy and distribution
