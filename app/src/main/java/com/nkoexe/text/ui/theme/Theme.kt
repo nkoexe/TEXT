@@ -13,14 +13,30 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nkoexe.text.R
 
-private val OutfitFontFamily = FontFamily(Font(R.font.outfit))
+// Register the same variable font at each supported weight. A single Font(R.font.outfit)
+// declaration fixes the variation axis at its declared weight, so TextStyle weights can
+ // otherwise look suspiciously thin even when they request Bold/ExtraBold.
+@OptIn(ExperimentalTextApi::class)
+private val OutfitFontFamily = FontFamily(
+    Font(R.font.outfit, weight = FontWeight.Thin, variationSettings = FontVariation.Settings(FontVariation.weight(100))),
+    Font(R.font.outfit, weight = FontWeight.ExtraLight, variationSettings = FontVariation.Settings(FontVariation.weight(200))),
+    Font(R.font.outfit, weight = FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),
+    Font(R.font.outfit, weight = FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
+    Font(R.font.outfit, weight = FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),
+    Font(R.font.outfit, weight = FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),
+    Font(R.font.outfit, weight = FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
+    Font(R.font.outfit, weight = FontWeight.ExtraBold, variationSettings = FontVariation.Settings(FontVariation.weight(800))),
+    Font(R.font.outfit, weight = FontWeight.Black, variationSettings = FontVariation.Settings(FontVariation.weight(900)))
+)
 private val DefaultTypography = Typography()
 
 private val OutfitTypography = Typography(
