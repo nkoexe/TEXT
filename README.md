@@ -5,11 +5,11 @@ A small offline Android app for composing a message, previewing it in a landscap
 ## Features
 
 - Native Kotlin + Jetpack Compose + Material 3 Expressive; Android 8.0 (API 26)+.
-- Outfit typography across the Compose UI.
+- Outfit variable-font typography with explicitly mapped weights from Thin through Black, so requested text styles use real font weights.
 - Material You wallpaper-derived colors on Android 12+, with system-aware light/dark fallbacks on older Android versions.
 - A blank, multiline editor canvas with centered white text on black. Its width and landscape aspect ratio stay constant when the keyboard opens.
 - Three compact, icon-only Material formatting placeholders for text color, background fill, and font, with accessible descriptions; customization is not functional yet.
-- The compact Recent panel stays visible while typing, scrolls independently, and holds at most 10 entries. Empty history uses a subtle Material crossed-circle icon; tap entries to reuse, swipe to delete.
+- Recent appears only when history contains entries. Entries render as a standalone list without an enclosing border, scroll independently, and hold at most 10 items; tap to reuse and swipe to delete.
 - Swipe deletion has a firmer threshold, a single threshold haptic request, and restrained color-transition feedback.
 - Measured font fitting down to 18sp; the editor warns if text still overflows at the minimum size.
 - One-tap immersive landscape display; Back returns to portrait editing.
