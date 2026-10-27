@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -58,6 +59,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -104,6 +106,13 @@ fun HomeScreen(
         val contentWidth = (maxWidth - horizontalPadding * 2).coerceAtLeast(1.dp)
         // Keep preview geometry tied to the display aspect ratio, not keyboard visibility.
         val previewHeight = (contentWidth / aspectRatio).coerceAtLeast(1.dp)
+        // Keep history secondary on a tall screen, and compact it further while the IME is open.
+        val historyHeight = when {
+            maxHeight < 560.dp && history.isEmpty() -> 92.dp
+            maxHeight < 560.dp -> 124.dp
+            history.isEmpty() -> 104.dp
+            else -> 176.dp
+        }
 
         Column(
             modifier = Modifier
@@ -119,41 +128,44 @@ fun HomeScreen(
                 ) {
                     OutlinedButton(
                         onClick = {},
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
                         shape = MaterialTheme.shapes.large,
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.text_tool_text_color),
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        Icon(
+                            painter = painterResource(R.drawable.ic_text_color),
+                            contentDescription = stringResource(R.string.text_tool_text_color),
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                     OutlinedButton(
                         onClick = {},
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
                         shape = MaterialTheme.shapes.large,
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.text_tool_background),
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        Icon(
+                            painter = painterResource(R.drawable.ic_background_fill),
+                            contentDescription = stringResource(R.string.text_tool_background),
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                     OutlinedButton(
                         onClick = {},
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
                         shape = MaterialTheme.shapes.large,
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.text_tool_font),
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        Icon(
+                            painter = painterResource(R.drawable.ic_font),
+                            contentDescription = stringResource(R.string.text_tool_font),
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -196,44 +208,47 @@ fun HomeScreen(
                 onDeleteHistory = onDeleteHistory,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .height(historyHeight)
             )
 
-            Button(
-                onClick = {
-                    if (text.isNotBlank()) {
-                        keyboardController?.hide()
-                        onShow()
-                    }
-                },
-                enabled = text.isNotBlank(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = MaterialTheme.shapes.extraLarge,
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+            Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                Spacer(Modifier.weight(1f))
+                    Button(
+                    onClick = {
+                        if (text.isNotBlank()) {
+                            keyboardController?.hide()
+                            onShow()
+                        }
+                    },
+                    enabled = text.isNotBlank(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 ) {
-                    Text(
-                        text = stringResource(R.string.text_show_action),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.2.sp
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Icon(
-                        imageVector = Icons.Filled.ArrowForward,
-                        contentDescription = null
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.text_show_action),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.2.sp
+                        )
+                        Spacer(Modifier.weight(1f))
+                        Icon(
+                            imageVector = Icons.Filled.ArrowForward,
+                            contentDescription = null
+                        )
+                    }
                 }
             }
         }
@@ -256,9 +271,9 @@ private fun HistoryPanel(
         ) {
             Text(
                 text = stringResource(R.string.text_history_section),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Medium
             )
         }
 
@@ -270,7 +285,7 @@ private fun HistoryPanel(
             color = MaterialTheme.colorScheme.surfaceContainerLow,
             border = BorderStroke(
                 1.dp,
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
             )
         ) {
             if (history.isEmpty()) {
@@ -280,17 +295,12 @@ private fun HistoryPanel(
                         .padding(horizontal = 20.dp, vertical = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.text_history_empty_title),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_history_empty),
+                        contentDescription = stringResource(R.string.text_history_empty_title),
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
+                    )
                 }
             } else {
                 LazyColumn(
