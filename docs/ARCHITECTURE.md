@@ -32,7 +32,7 @@ The small fixed history limit makes replacing ten rows transactionally a straigh
 ## UI behavior
 - The home editor follows the system light/dark setting and uses wallpaper-based dynamic colors on Android 12+.
 - The message canvas and fullscreen display remain black with white text so the preview mirrors what is shown to another person.
-- History remains visible while the keyboard is open. The editor preview and action button compact in this state; only the history list scrolls independently.
+- History remains visible while the keyboard is open and scrolls independently. The editor canvas retains the same full content width and landscape aspect ratio regardless of keyboard visibility; history absorbs the reduced vertical space.
 - The display transitions to immersive landscape and restores the themed system bars when returning home.
 
 ## Preview/display sizing

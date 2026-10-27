@@ -10,16 +10,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
@@ -69,7 +66,7 @@ import androidx.compose.ui.unit.sp
 import com.nkoexe.text.R
 import com.nkoexe.text.data.HistoryRecord
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     text: String,
@@ -83,7 +80,6 @@ fun HomeScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     val aspectRatio = remember(context) { landscapeDisplayAspectRatio(context) }
-    val imeVisible = WindowInsets.isImeVisible
     var textOverflowsAtMinimum by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -100,25 +96,15 @@ fun HomeScreen(
     ) {
         val horizontalPadding = if (maxWidth < 360.dp) 16.dp else 22.dp
         val contentWidth = (maxWidth - horizontalPadding * 2).coerceAtLeast(1.dp)
-        val compactLayout = imeVisible || maxHeight < 620.dp
-        val previewHeightLimit = when {
-            imeVisible -> 100.dp
-            maxHeight < 620.dp -> 142.dp
-            else -> 196.dp
-        }
-        val previewHeight = minOf(contentWidth / aspectRatio, previewHeightLimit)
-        val previewWidth = (previewHeight * aspectRatio).coerceAtMost(contentWidth)
+        // Keep preview geometry tied to the display aspect ratio, not keyboard visibility.
+        val previewHeight = (contentWidth / aspectRatio).coerceAtLeast(1.dp)
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(
-                    horizontal = horizontalPadding,
-                    vertical = if (compactLayout) 8.dp else 14.dp
-                ),
-            verticalArrangement = Arrangement.spacedBy(if (compactLayout) 7.dp else 12.dp)
+                .padding(horizontal = horizontalPadding, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            HomeHeader(compact = compactLayout)
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(
@@ -152,7 +138,7 @@ fun HomeScreen(
                         focusRequester = focusRequester,
                         onOverflowChange = { textOverflowsAtMinimum = it },
                         modifier = Modifier
-                            .width(previewWidth)
+                            .fillMaxWidth()
                             .height(previewHeight)
                     )
                 }
@@ -176,7 +162,6 @@ fun HomeScreen(
                 history = history,
                 onSelectHistory = onSelectHistory,
                 onDeleteHistory = onDeleteHistory,
-                compact = compactLayout,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -192,7 +177,7 @@ fun HomeScreen(
                 enabled = text.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(if (compactLayout) 52.dp else 60.dp),
+                    .height(56.dp),
                 shape = MaterialTheme.shapes.extraLarge,
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -224,61 +209,17 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader(compact: Boolean) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.text_app_name),
-                color = MaterialTheme.colorScheme.onBackground,
-                style = if (compact) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-1.4).sp,
-                lineHeight = if (compact) 32.sp else 40.sp
-            )
-            Text(
-                text = stringResource(R.string.text_tagline),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        Surface(
-            shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-        ) {
-            Text(
-                text = "Aa",
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-1).sp
-            )
-        }
-    }
-}
-
-@Composable
 private fun HistoryPanel(
     history: List<HistoryRecord>,
     onSelectHistory: (String) -> Unit,
     onDeleteHistory: (String) -> Unit,
-    compact: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = if (compact) 5.dp else 8.dp),
+                .padding(bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -288,15 +229,6 @@ private fun HistoryPanel(
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.weight(1f))
-            if (!compact) {
-                Text(
-                    text = stringResource(R.string.text_history_swipe_hint),
-                    modifier = Modifier.padding(end = 10.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelSmall,
-                    letterSpacing = 0.35.sp
-                )
-            }
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.secondaryContainer,
@@ -338,12 +270,6 @@ private fun HistoryPanel(
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(R.string.text_history_empty_body),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center
                         )
                     }
                 }

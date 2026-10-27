@@ -19,6 +19,7 @@ TEXT is a minimal Android utility for composing a short message and presenting i
 - Multiline text input, natural wrapping, centered horizontally and vertically.
 - Focus the input and open the keyboard on launch and when returning from display.
 - Keep the Recent history section visible at all times, including while the keyboard is open. The list scrolls independently in its own constrained panel.
+- Keep the editor canvas full-width within the screen margins and preserve its landscape aspect ratio when the keyboard appears; the history panel absorbs the changing vertical space.
 - Keep the SHOW action visible above the keyboard. Empty/whitespace-only content cannot be displayed.
 - Show an empty-history state before the first message has been displayed.
 
