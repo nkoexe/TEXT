@@ -8,9 +8,9 @@ These instructions apply to the entire repository. Read this file before making 
 - Keep the implementation deliberately small. Do not add accounts, runtime networking, analytics, ads, settings, theme customization, or Play Store publishing without an explicit product decision.
 - Minimum supported Android version is Android 8.0 (API 26).
 - Use Kotlin, Jetpack Compose, and Material 3. Follow `docs/PRODUCT_SPEC.md` as the source of truth for behavior.
-- The editor uses Outfit typography across the Compose UI. Android 12+ uses wallpaper-derived Material You colors; older versions use system light/dark fallback palettes.
+- The editor uses Outfit variable-font typography with each weight explicitly mapped to the font's weight axis. Keep bold styles genuinely bold, especially SHOW. Android 12+ uses wallpaper-derived Material You colors; older versions use system light/dark fallback palettes.
 - The three formatting toolbar controls are icon-only Material placeholders with accessible content descriptions. They remain inert; do not imply that custom colors, backgrounds, or fonts work until implemented.
-- Keep the editor canvas full available width and derive its height from the device's landscape aspect ratio, independent of keyboard visibility. History must remain visible and scroll independently while typing.
+- Keep the editor canvas full available width and derive its height from the device's landscape aspect ratio, independent of keyboard visibility. Hide Recent entirely when history is empty; otherwise show a compact, independently scrollable list with no enclosing bordered container.
 - The editor canvas is intentionally blank when no text has been entered; do not re-add a placeholder prompt without a product request.
 
 ## Engineering rules
