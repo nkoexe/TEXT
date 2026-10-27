@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -106,24 +107,50 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.text_message_label),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.1.sp
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        text = stringResource(R.string.text_character_count, text.length),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                    OutlinedButton(
+                        onClick = {},
+                        modifier = Modifier.weight(1f),
+                        shape = MaterialTheme.shapes.large,
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.text_tool_text_color),
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = {},
+                        modifier = Modifier.weight(1f),
+                        shape = MaterialTheme.shapes.large,
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.text_tool_background),
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = {},
+                        modifier = Modifier.weight(1f),
+                        shape = MaterialTheme.shapes.large,
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.text_tool_font),
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
                 Box(
@@ -228,19 +255,6 @@ private fun HistoryPanel(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.weight(1f))
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            ) {
-                Text(
-                    text = stringResource(R.string.text_history_count, history.size),
-                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
         }
 
         Surface(

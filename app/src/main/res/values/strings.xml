@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_app_name">TEXT</string>
-    <string name="text_message_label">YOUR MESSAGE</string>
-    <string name="text_character_count">%1$d characters</string>
     <string name="text_editor_placeholder">Start typing…</string>
     <string name="text_show_action">SHOW</string>
     <string name="text_history_section">Recent</string>
-    <string name="text_history_count">%1$d / 10</string>
+    <string name="text_tool_text_color">Text color</string>
+    <string name="text_tool_background">Background</string>
+    <string name="text_tool_font">Font</string>
     <string name="text_history_empty_title">Nothing here yet</string>
     <string name="text_delete_action">Delete</string>
     <string name="text_overflow_warning">Text may not fit at the minimum size (18 sp).</string>
