@@ -32,7 +32,7 @@ This checklist distinguishes implementation from device validation. A checked im
 - [x] Preview width and landscape aspect ratio are independent of keyboard visibility.
 - [x] Outfit is applied to all Compose Material typography roles and used by both editor and fullscreen text.
 - [x] Dynamic Material You color on Android 12+ and system-aware light/dark fallback palettes on older versions.
-- [x] Formatting toolbar placeholders for Text color, Background, and Font; these buttons are intentionally inert.
+- [x] Icon-only Material formatting placeholders for text color, background fill, and font; these controls are intentionally inert.
 - [x] Fullscreen black/white message display, landscape orientation request, immersive system bars, and keep-screen-on behavior.
 - [x] Pure font-fit policy tests cover boundary cases and invalid input.
 - [ ] Verify keyboard opening/closing, fixed canvas geometry, and SHOW reachability with different keyboard heights, screen sizes, and font scales.
